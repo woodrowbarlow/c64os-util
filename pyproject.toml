@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "c64os-util"
+version = "0.1.0"
+description = "A collection of utilities for dealing with C64 OS files."
+authors = ["voidstar <voidstar@anachronauts.club>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/woodrowbarlow/c64os-util"
+repository = "https://github.com/woodrowbarlow/c64os-util"
+keywords = ["commodore", "c64", "C64 OS"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+include = [
+    "LICENSE",
+]
+packages = [{include = "c64os_util"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+cbmcodecs2 = "^1.2"
+sortedcollections = "^2.1.0"
+
+[tool.poetry.scripts]
+tests = 'scripts.tests:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
