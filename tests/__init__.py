@@ -1,1 +1,0 @@
-from .schema.app import *
