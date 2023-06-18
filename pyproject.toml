@@ -1,0 +1,129 @@
+[tool.poetry]
+name = "c64os-util"
+version = "0.1.0"
+description = "A collection of utilities for dealing with C64 OS files."
+authors = ["voidstar <voidstar@anachronauts.club>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/woodrowbarlow/c64os-util"
+repository = "https://github.com/woodrowbarlow/c64os-util"
+keywords = ["commodore", "c64", "C64 OS"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+include = [
+    "LICENSE",
+]
+packages = [{include = "c64os_util"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+cbmcodecs2 = "^1.2"
+
+[tool.poetry.scripts]
+car = 'scripts.car:main'
+
+[tool.poe.tasks]
+_clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
+
+  [tool.poe.tasks.docs]
+  help = "Build the docs using Sphinx"
+  cmd  = "sphinx-build docs docs/_build"
+  deps = ["_clean_docs"]
+
+  [tool.poe.tasks.docs-serve]
+  help   = "Serves the docs locally with livereload"
+  script = "docs:serve"
+  cwd    = "./docs"
+  deps   = ["docs"]
+
+  [tool.poe.tasks.docs-check]
+  help = "Validate rst syntax in the docs"
+  sequence = [
+    { cmd  = "rstcheck -r docs --ignore-roles bash,toml,sh,python --ignore-substitutions V" },
+    "docs -b linkcheck"
+  ]
+
+  [tool.poe.tasks.format-isort]
+  help = "Run isort on the code base"
+  cmd  = "isort ."
+
+  [tool.poe.tasks.format-black]
+  help = "Run black on the code base"
+  cmd  = "black ."
+
+  [tool.poe.tasks.format]
+  help     = "Run formating tools on the code base"
+  sequence = ["format-isort", "format-black"]
+
+  [tool.poe.tasks.clean]
+  help = "Remove generated files"
+  cmd  = """
+    rm -rf .coverage
+           .mypy_cache
+           .pytest_cache
+           ./**/__pycache__
+           dist
+           htmlcov
+           ./docs/_build
+  """
+
+  [tool.poe.tasks.test]
+  help = "Run unit and feature tests"
+  cmd  = "pytest --cov=c64os_util"
+
+  [tool.poe.tasks.mypy]
+  help = "Run the mypy linter"
+  cmd  = "mypy c64os_util --ignore-missing-imports"
+
+  [tool.poe.tasks.pylint]
+  help = "Run the pylint linter"
+  cmd  = "pylint c64os_util"
+
+  [tool.poe.tasks.lint]
+  help = "Run the linters"
+  sequence = ["mypy", "pylint"]
+
+  [tool.poe.tasks.style-black]
+  help = "Validate black code style"
+  cmd  = "black . --check --diff"
+
+  [tool.poe.tasks.style-isort]
+  help = "Validate isort code style"
+  cmd  = "isort . --check --diff"
+
+  [tool.poe.tasks.style]
+  help = "Validate code style"
+  sequence = ["style-isort", "style-black"]
+
+  [tool.poe.tasks.check]
+  help     = "Run all checks on the code base"
+  sequence = ["style", "lint", "test"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint]
+max-line-length = 88
+# re-enable these soon...
+disable = [ 'C0114', 'C0115', 'C0116' ]
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0.1"
+livereload = "^2.6.3"
+rstcheck = "^6.1.2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+poethepoet = "^0.20.0"
+isort = "^5.12.0"
+pytest = "^7.4.0"
+mypy = "^1.4.1"
+pylint = "^2.17.4"
+pytest-cov = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
