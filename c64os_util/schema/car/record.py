@@ -1,7 +1,6 @@
 import abc
 import os
 import io
-import sortedcollections
 
 from c64os_util.schema.util import BaseSchema, LC_CODEC, read_line
 from c64os_util.schema.car.common import CarRecordType, CarCompressionType
@@ -29,14 +28,6 @@ class ArchiveRecordHeader(BaseSchema):
         buffer.write(name_bytes)
         buffer.write(b'\0') # ???
         self.compression_type.serialize(buffer)
-
-
-    def __eq__(self, other):
-        if self.name != other.name:
-            return False
-        if self.record_type != other.record_type:
-            return False
-        return True
 
 
 class ArchiveRecord(BaseSchema, abc.ABC):
@@ -69,14 +60,10 @@ class ArchiveRecord(BaseSchema, abc.ABC):
     def path(self, sep=os.path.sep):
         path = []
         record = self
-        while record:
+        while record is not None:
             path.insert(0, record.header.name)
             record = record.parent
         return sep.join(path)
-
-
-    def __eq__(self, other):
-        return self.header == other.header
 
 
     @staticmethod
@@ -157,16 +144,46 @@ class ArchiveFileRecord(ArchiveRecord, io.BytesIO):
         record.seek(0)
 
 
-class ArchiveDirectoryRecord(ArchiveRecord, sortedcollections.OrderedSet):
+class ArchiveDirectoryRecord(ArchiveRecord, list):
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, iterable=None):
+        if iterable is None:
+            iterable = []
         self._parent = None
         self._header = ArchiveRecordHeader(
             CarRecordType.DIRECTORY,
             0, name,
             CarCompressionType.NONE
         )
-        super().__init__(*args, **kwargs)
+        super().__init__(
+            self._validate(item) for item in iterable
+        )
+
+
+    def __setitem__(self, index, item):
+        super().__setitem__(index, self._validate(item))
+
+
+    def insert(self, index, item):
+        super().insert(index, self._validate(item))
+
+
+    def append(self, item):
+        super().append(self._validate(item))
+
+
+    def extend(self, other):
+        super().extend(self._validate(item) for item in other)
+
+
+    def _validate(self, record):
+        if not isinstance(record, ArchiveRecord):
+            raise ValueError(f"a directory can only contain files or other directories")
+        child = self.get_child(record.name)
+        if child:
+            raise ValueError(f"a directory or file already exists at path {child.path()}")
+        record._parent = self
+        return record
 
 
     @property
@@ -193,20 +210,6 @@ class ArchiveDirectoryRecord(ArchiveRecord, sortedcollections.OrderedSet):
             yield child
 
 
-    def add(self, *args, **kwargs):
-        super().add(*args, **kwargs)
-        self.header.size = len(self)
-        for child in self:
-            child._parent = self
-
-
-    def discard(self, *args, **kwargs):
-        super().discard(*args, **kwargs)
-        self.header.size = len(self)
-        for child in self:
-            child._parent = self
-
-
     def get_child(self, name):
         for child in self:
             if child.header.name == name:
@@ -221,6 +224,7 @@ class ArchiveDirectoryRecord(ArchiveRecord, sortedcollections.OrderedSet):
 
 
     def serialize(self, buffer):
+        self.header.size = len(self)
         self.header.serialize(buffer)
         for child in self:
             child.serialize(buffer)
@@ -232,5 +236,5 @@ class ArchiveDirectoryRecord(ArchiveRecord, sortedcollections.OrderedSet):
         for _ in range(header.size):
             child_header = ArchiveRecordHeader.deserialize(buffer)
             child = ArchiveRecord.deserialize(buffer, child_header)
-            record.add(child)
+            record.append(child)
         return record

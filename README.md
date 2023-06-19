@@ -19,16 +19,20 @@ import the module:
 
     import c64os_util as c64os
 
-load an archive:
+open an archive:
 
     path = os.path.join('path', 'to', 'my', 'archive.car')
+
+    # you can deserialize from a buffer:
     with open(path, 'rb') as f:
         archive = c64os.CbmArchive.deserialize(f)
 
-or create an empty one from scratch:
+    # or use the helper function (equivalent to above):
+    archive = load_car(path)
 
+    # or create an empty one from scratch:
     archive = c64os.CbmArchive(
-        archive_type=CarArchiveType.GENERAL,
+        archive_type=CarArchiveType.INSTALL,
         note='hello world!',
     )
 
@@ -51,20 +55,34 @@ you can iterate through all the files:
 
 and you can directly open any file for reading or writing:
 
+    # invoking the archive returns a context manager
+    # the API is the same as python's 'open' function
+    # except when creating files you can specify record_type
+    # (to distinguish between PRG and SEQ files)
+
+    # for text files, you can specify encodings from cbmcodecs2
     path = os.path.join('path', 'to', 'data.t')
     with archive(path, 'w', encoding='petscii_c64en_lc') as f:
         print('hello world', end='\r', file=f)
-    path = os.path.join('path', 'to', 'main.o')
-    local_path = os.path.join('out', 'main.o')
-    with archive(path, 'wb') as f1, open(local_path, 'rb') as f2:
+
+    # you can copy files into the archive like this
+    path = os.path.join('path', 'to', 'program.prg') # path in archive
+    h_path = os.path.join('out', 'program.prg') # path on host filesystem
+    t = CarRecordType.PRGFILE
+    with archive(path, 'wb', record_type=t) as f1, open(h_path, 'rb') as f2:
         data = f2.read()
         f1.write(data)
 
 when you're finished, you can save the full archive to a file:
 
     path = os.path.join('path', 'to', 'my', 'archive.car')
+
+    # by serializing to a buffer:
     with open(path, 'wb') as f:
         archive.serialize(f)
+
+    # or using the helper function (equivalent to above):
+    save_car(archive, path)
 
 ## usage (from cli)
 
@@ -90,7 +108,9 @@ i would love help. i'm in the C64 OS discord.
 ## todo (longer-term)
 
 * [ ] document APIs
+* [ ] more rigorous error handling
 * [ ] write higher-quality tests
 * [ ] set up formatters and linters
 * [ ] publish documentation
 * [ ] set up contributing guidelines
+* [ ] pydantic?

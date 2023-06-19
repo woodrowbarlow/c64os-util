@@ -10,10 +10,9 @@ class TestCbmArchive(unittest.TestCase):
 
     def test_foo(self):
         archive = CbmArchive(note='hello world')
-        archive.touch(
-            'example-app/main.o',
-            file_type=CarRecordType.PRGFILE,
-            create_directories=True,
-        )
-        for record in archive:
-            print(record.path())
+        with archive('example-app/data/info.t', 'w') as f:
+            print('hello', file=f)
+            print('world', file=f)
+        with archive('example-app/data/info.t', 'r') as f:
+            for line in f:
+                print(line)
