@@ -21,10 +21,13 @@ packages = [{include = "c64os_util"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 cbmcodecs2 = "^1.2"
-sortedcollections = "^2.1.0"
 
 [tool.poetry.scripts]
 tests = 'scripts.tests:main'
+docs = 'scripts.docs:main'
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0.1"
 
 [build-system]
 requires = ["poetry-core"]

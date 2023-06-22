@@ -1,18 +1,30 @@
 import unittest
 
-from c64os_util import (
-    CarArchiveType, CarRecordType, CarCompressionType,
-    CbmArchive, ArchiveDirectoryRecord, ArchiveFileRecord,
+from c64os_util.car import (
+    ArchiveFile, ArchiveDirectory
 )
 
 
-class TestCbmArchive(unittest.TestCase):
+class TestArchive(unittest.TestCase):
 
-    def test_foo(self):
-        archive = CbmArchive(note='hello world')
-        with archive('example-app/data/info.t', 'w') as f:
-            print('hello', file=f)
-            print('world', file=f)
-        with archive('example-app/data/info.t', 'r') as f:
-            for line in f:
-                print(line)
+    def test_file(self):
+        f = ArchiveFile(name='foo')
+        f.write('hello world'.encode('petscii_c64en_lc'))
+        assert f.size == len('hello world')
+        f.seek(0)
+        data = f.read().decode('petscii_c64en_lc')
+        assert data == 'hello world'
+
+
+    def test_directory(self):
+        root = ArchiveDirectory(name='root')
+        root += [
+            ArchiveDirectory(name='foo'),
+            ArchiveFile(name='bar'),
+        ]
+        assert len(root) == 2
+        assert root['foo'] == root[0]
+        assert root['bar'] == root[1]
+        assert root['bar'] != root['foo']
+        with self.assertRaises(ValueError):
+            root.append(ArchiveDirectory('bar'))

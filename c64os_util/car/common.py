@@ -1,14 +1,6 @@
 import enum
 
 
-CAR_MAGIC = 'C64Archive'
-CAR_VERSION = 2
-
-
-# the entire car implementation was based on gillham's excellent uncar.py
-# https://github.com/gillham/C64/blob/main/C64OS/uncar/uncar.py
-
-
 class CarArchiveType(enum.Enum):
 
     GENERAL = 0
@@ -48,6 +40,10 @@ class CarRecordType(enum.Enum):
     PRGFILE = 0x50
     SEQFILE = 0x53
     DIRECTORY = 0x44
+
+
+    def is_directory(self):
+        return self == CarRecordType.DIRECTORY
 
 
     def serialize(self, buffer):
