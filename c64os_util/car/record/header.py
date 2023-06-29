@@ -1,6 +1,7 @@
 import typing
 
 from ..common import CarRecordType, CarCompressionType
+from ...util import LC_CODEC
 
 
 class ArchiveRecordHeader:
@@ -79,24 +80,28 @@ class ArchiveRecordHeader:
         name_bytes = self.name.encode(LC_CODEC)
         name_bytes = name_bytes.ljust(ArchiveRecordHeader.MAX_NAME_SIZE, b'\xA0')
         buffer.write(name_bytes)
-        buffer.write(b'\0') # ???'
+        buffer.write(b'\0') # ???
         self.compression_type.serialize(buffer)
 
 
     @staticmethod
-    def deseralize(buffer: typing.BinaryIO) -> 'ArchiveRecordHeader':
+    def deserialize(buffer: typing.BinaryIO) -> 'ArchiveRecordHeader':
         """
         Read binary data from a buffer and parse it into a record header.
         
         :param buffer: The buffer from which to read.
         :return: The parsed record header object.
         """
-        header = ArchiveRecordHeader()
-        header.record_type = CarRecordType.deseralize(buffer)
+        record_type = CarRecordType.deserialize(buffer)
         buffer.read(1) # lock byte?
-        header.size = int.from_bytes(buffer.read(3), 'little')
+        size = int.from_bytes(buffer.read(3), 'little')
         name_bytes = buffer.read(ArchiveRecordHeader.MAX_NAME_SIZE)
-        header.name = name_bytes.rstrip(b'\xA0').decode(LC_CODEC)
+        name = name_bytes.rstrip(b'\xA0').decode(LC_CODEC)
         buffer.read(1) # ???
-        header.compression_type = CarCompressionType.deseralize(buffer)
-        return header
+        compression_type = CarCompressionType.deserialize(buffer)
+        return ArchiveRecordHeader(
+            name=name,
+            size=size,
+            record_type=record_type,
+            compression_type=compression_type,
+        )

@@ -1,4 +1,5 @@
 import enum
+import typing
 
 
 class CarArchiveType(enum.Enum):
@@ -8,14 +9,14 @@ class CarArchiveType(enum.Enum):
     INSTALL = 2
 
 
-    def serialize(self, buffer):
-        return self.value.to_bytes(1, 'little')
+    def serialize(self, buffer: typing.BinaryIO):
+        buffer.write(self.value.to_bytes(1, 'little'))
 
 
     @staticmethod
-    def deserialize(buffer):
+    def deserialize(buffer: typing.BinaryIO) -> 'CarArchiveType':
         val = int.from_bytes(buffer.read(1), 'little')
-        return CarRecordType(val)
+        return CarArchiveType(val)
 
 
 class CarCompressionType(enum.Enum):
@@ -25,14 +26,14 @@ class CarCompressionType(enum.Enum):
     LZ = 2
 
 
-    def serialize(self, buffer):
-        return self.value.to_bytes(1, 'little')
+    def serialize(self, buffer: typing.BinaryIO):
+        buffer.write(self.value.to_bytes(1, 'little'))
 
 
     @staticmethod
-    def deserialize(buffer):
+    def deserialize(buffer: typing.BinaryIO) -> 'CarCompressionType':
         val = int.from_bytes(buffer.read(1), 'little')
-        return CarRecordType(val)
+        return CarCompressionType(val)
 
 
 class CarRecordType(enum.Enum):
@@ -46,11 +47,11 @@ class CarRecordType(enum.Enum):
         return self == CarRecordType.DIRECTORY
 
 
-    def serialize(self, buffer):
-        return self.value.to_bytes(1, 'little')
+    def serialize(self, buffer: typing.BinaryIO):
+        buffer.write(self.value.to_bytes(1, 'little'))
 
 
     @staticmethod
-    def deserialize(buffer):
+    def deserialize(buffer: typing.BinaryIO) -> 'CarRecordType':
         val = int.from_bytes(buffer.read(1), 'little')
         return CarRecordType(val)
