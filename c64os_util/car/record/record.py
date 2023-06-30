@@ -1,6 +1,7 @@
 import abc
 import io
 import os
+import copy
 import typing
 
 from .header import ArchiveRecordHeader
@@ -339,6 +340,20 @@ class ArchiveDirectory(ArchiveRecord, list):
         super().__setitem__(index, self._validate(item))
 
 
+    def __add__(self, other):
+        if isinstance(other, ArchiveDirectory):
+            s = copy.deepcopy(self)
+            s.merge(other)
+            return s
+        return super().__add__(other)
+
+
+    def __contains__(self, other):
+        if isinstance(other, str):
+            return self.get_child(other) is not None
+        return super().__contains__(other)
+
+
     def insert(self, index: int, item: ArchiveRecord):
         super().insert(index, self._validate(item))
 
@@ -364,6 +379,22 @@ class ArchiveDirectory(ArchiveRecord, list):
         if child is not None:
             raise ValueError(f"a directory or file already exists in {self.name} with name {child.name}")
         return record
+
+
+    def merge(self, other: 'ArchiveDirectory'):
+        if other.name != self.name:
+            raise ValueError("directories must have the same name to be merged")
+        for child in other:
+            try:
+                self_child = self[child.name]
+            except KeyError:
+                self.append(child)
+                continue
+            if not isinstance(child, ArchiveDirectory):
+                raise ValueError(f"both directories contain a record named {child.name}")
+            if not isinstance(self_child, ArchiveDirectory):
+                raise ValueError(f"both directories contain a record named {child.name}")
+            self_child.merge(child)
 
 
     def serialize(self, buffer: typing.BinaryIO):
