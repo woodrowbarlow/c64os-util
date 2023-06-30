@@ -47,6 +47,8 @@ class TestArchive(unittest.TestCase):
         with self.assertRaises(ValueError):
             b + c
         merged = a + b
+        assert len(a) == 2
+        assert len(b) == 1
         assert merged.name == 'root'
         assert len(merged) == 3
         assert 'inner' in merged
@@ -94,7 +96,7 @@ class TestArchive(unittest.TestCase):
             archive.mkdir('root/inner', sep='/')
         archive.mkdir('root/inner', sep='/', exists_ok=True)
         assert archive['root'].size == 1
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             archive.mkdir('root/deeper/nested', sep='/')
         record = archive.mkdir('root/deeper/nested', sep='/', create_missing=True)
         assert 'deeper' in archive['root']
@@ -106,6 +108,59 @@ class TestArchive(unittest.TestCase):
             archive.mkdir('root/dummy', sep='/')
         with self.assertRaises(ValueError):
             archive.mkdir('root/dummy', sep='/', exists_ok=True)
+
+
+    def test_touch(self):
+        archive = self._create_archive()
+        record = archive.touch('foo.o', sep='/', file_type=CarRecordType.PRGFILE)
+        assert 'foo.o' in archive
+        assert isinstance(archive['foo.o'], ArchiveFile)
+        assert archive['foo.o'].file_type == CarRecordType.PRGFILE
+        assert archive['foo.o'].compression_type == CarCompressionType.NONE
+        assert not archive['foo.o'].size
+        with self.assertRaises(ValueError):
+            archive.touch('foo.o', sep='/')
+        with self.assertRaises(ValueError):
+            archive.touch('bar.t', sep='/')
+        archive = self._create_archive()
+        with self.assertRaises(ValueError):
+            archive.touch('root/foo.t', sep='/')
+        record = archive.touch('root/foo.t', sep='/', create_directories=True)
+        assert 'root' in archive
+        assert isinstance(archive['root'], ArchiveDirectory)
+        assert archive['root'].size == 1
+        assert 'foo.t' in archive['root']
+        assert isinstance(archive['root']['foo.t'], ArchiveFile)
+        assert archive['root']['foo.t'].file_type == CarRecordType.SEQFILE
+        with io.BytesIO() as f:
+            f.write(5 * b'\0')
+            f.seek(0)
+            archive.touch('root/test.o', sep='/', buffer=f)
+        assert 'test.o' in archive['root']
+        assert isinstance(archive['root']['test.o'], ArchiveFile)
+        assert archive['root']['test.o'].size == 5
+
+
+    def test_rm(self):
+        archive = self._create_archive()
+        with self.assertRaises(ValueError):
+            archive.rm('root', sep='/')
+        archive.rm('root', sep='/', missing_ok=True)
+        archive.root = ArchiveDirectory(name='root')
+        archive['root'].append(ArchiveFile(name='foo.t'))
+        assert archive['root'].size == 1
+        assert 'foo.t' in archive['root']
+        with self.assertRaises(ValueError):
+            archive.rm('root', sep='/')
+        archive.rm('root/foo.t', sep='/')
+        assert archive['root'].size == 0
+        assert 'foo.t' not in archive['root']
+        archive.rm('root', sep='/')
+        assert archive.root is None
+        archive.root = ArchiveDirectory(name='root')
+        archive['root'].append(ArchiveFile(name='foo.t'))
+        archive.rm('root', sep='/', recursive=True)
+        assert archive.root is None
 
 
     def test_deserialize(self):

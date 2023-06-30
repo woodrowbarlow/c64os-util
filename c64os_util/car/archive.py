@@ -62,8 +62,11 @@ class C64Archive:
         create_missing: bool = False,
     ):
         if len(path):
+            if create_missing and self.root is None:
+                self.root = ArchiveDirectory(name=path[-1])
             parent = self._find_path(self.root, path, create_directories=create_missing)
             parent += [ child ]
+            return
         if self.root is not None:
             raise ValueError()
         self.root = child
@@ -99,7 +102,11 @@ class C64Archive:
         if isinstance(parent[tail], ArchiveDirectory):
             if parent[tail].size and not recursive:
                 raise ValueError()
-        del parent[tail]
+        for i, child in enumerate(parent):
+            if child.name == tail:
+                del parent[i]
+                return
+        raise ValueError()
 
 
     def mkdir(
@@ -135,7 +142,7 @@ class C64Archive:
             tail = parts[-1]
             parts = parts[:-1]
             record = ArchiveFile(name=tail, file_type=file_type, compression_type=compression_type)
-            self.__insert_path(record, parts, create_missing=create_missing)
+            self.__insert_path(record, parts, create_missing=create_directories)
             if buffer is not None:
                 copy_buffer(buffer, record)
             return record
