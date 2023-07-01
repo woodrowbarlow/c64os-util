@@ -10,9 +10,3 @@ C64 Archives can also serve as "installers" for software and updates. Any archiv
 An archive must contain a single root entry -- which means if you want to store multiple files, the root entry must be a directory.
 
 Note: For now, compression is not supported.
-
-.. toctree::
-   archive/common
-   archive/archive
-   archive/header
-   record

@@ -152,4 +152,6 @@ class ArchiveHeader:
         note = note_buff.rstrip(b"\0").decode(LC_CODEC)
         assert magic == ArchiveHeader.CAR_MAGIC
         assert version == ArchiveHeader.CAR_VERSION
-        return ArchiveHeader(archive_type=archive_type, timestamp=timestamp, note=note)
+        return ArchiveHeader(
+            archive_type=archive_type, timestamp=timestamp.to_datetime(), note=note
+        )

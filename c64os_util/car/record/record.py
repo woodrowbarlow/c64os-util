@@ -227,7 +227,9 @@ class ArchiveDirectory(ArchiveRecord, list):
         print(d['bar'].file_type)
     """
 
-    def __init__(self, name: str = "", iterable: list[ArchiveRecord] = None):
+    def __init__(
+        self, name: str = "", iterable: typing.Optional[list[ArchiveRecord]] = None
+    ):
         """
         Create a new directory record.
 
@@ -266,7 +268,7 @@ class ArchiveDirectory(ArchiveRecord, list):
         """
         return CarCompressionType.NONE
 
-    def get_child(self, name: str) -> ArchiveRecord:
+    def get_child(self, name: str) -> typing.Optional[ArchiveRecord]:
         """
         Get a child record by name.
 
@@ -309,7 +311,7 @@ class ArchiveDirectory(ArchiveRecord, list):
             return child
         raise KeyError(f"{self.name} does not contain {arg}")
 
-    def __setitem__(self, index: int, item: ArchiveRecord):
+    def __setitem__(self, index, item):
         """
         Set the child record at the specified numeric index.
 
@@ -330,13 +332,13 @@ class ArchiveDirectory(ArchiveRecord, list):
             return self.get_child(other) is not None
         return super().__contains__(other)
 
-    def insert(self, index: int, item: ArchiveRecord):
+    def insert(self, index, item):
         super().insert(index, self._validate(item))
 
-    def append(self, item: ArchiveRecord):
+    def append(self, item):
         super().append(self._validate(item))
 
-    def extend(self, other: list[ArchiveRecord]):
+    def extend(self, other):
         super().extend(self._validate(item) for item in other)
 
     def _validate(self, record: ArchiveRecord) -> ArchiveRecord:

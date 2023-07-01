@@ -19,7 +19,7 @@ include = [
 packages = [{include = "c64os_util"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1"
+python = ">=3.8.1,<4.0"
 cbmcodecs2 = "^1.2"
 
 [tool.poetry.scripts]
@@ -32,6 +32,19 @@ _clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
   help = "Build the docs using Sphinx"
   cmd  = "sphinx-build docs docs/_build"
   deps = ["_clean_docs"]
+
+  [tool.poe.tasks.docs-serve]
+  help   = "Serves the docs locally with livereload"
+  script = "docs:serve"
+  cwd    = "./docs"
+  deps   = ["docs"]
+
+  [tool.poe.tasks.docs-check]
+  help = "Validate rst syntax in the docs"
+  sequence = [
+    { cmd  = "rstcheck -r docs --ignore-roles bash,toml,sh,python --ignore-substitutions V" },
+    "docs -b linkcheck"
+  ]
 
   [tool.poe.tasks.format-isort]
   help = "Run isort on the code base"
@@ -59,15 +72,19 @@ _clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
 
   [tool.poe.tasks.test]
   help = "Run unit and feature tests"
-  cmd  = "pytest --cov=poethepoet"
+  cmd  = "pytest --cov=c64os_util"
 
-  [tool.poe.tasks.types]
-  help = "Run the type checker"
-  cmd  = "mypy poethepoet --ignore-missing-imports"
+  [tool.poe.tasks.mypy]
+  help = "Run the mypy linter"
+  cmd  = "mypy c64os_util --ignore-missing-imports"
+
+  [tool.poe.tasks.pylint]
+  help = "Run the pylint linter"
+  cmd  = "pylint c64os_util"
 
   [tool.poe.tasks.lint]
-  help = "Run the linter"
-  cmd  = "pylint poethepoet"
+  help = "Run the linters"
+  sequence = ["mypy", "pylint"]
 
   [tool.poe.tasks.style-black]
   help = "Validate black code style"
@@ -83,13 +100,15 @@ _clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
 
   [tool.poe.tasks.check]
   help     = "Run all checks on the code base"
-  sequence = ["style", "types", "lint", "test"]
+  sequence = ["style", "test"]
 
 [tool.isort]
 profile = "black"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.1"
+livereload = "^2.6.3"
+rstcheck = "^6.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"

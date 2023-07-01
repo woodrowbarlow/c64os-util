@@ -29,16 +29,16 @@ class C64Archive:
         self._header = value
 
     @property
-    def root(self) -> ArchiveRecord:
+    def root(self) -> typing.Optional[ArchiveRecord]:
         return self._root
 
     @root.setter
-    def root(self, value: ArchiveRecord):
+    def root(self, value: typing.Optional[ArchiveRecord]):
         self._root = value
 
     def _find_path(
         self,
-        start: ArchiveRecord,
+        start: typing.Optional[ArchiveRecord],
         path: typing.List[str],
         create_directories: bool = False,
     ):
@@ -142,7 +142,7 @@ class C64Archive:
         file_type: CarRecordType = CarRecordType.SEQFILE,
         compression_type: CarCompressionType = CarCompressionType.NONE,
         create_directories: bool = False,
-        buffer: typing.BinaryIO = None,
+        buffer: typing.Optional[typing.BinaryIO] = None,
     ):
         try:
             record = self.ls(path, sep=sep)
