@@ -1,3 +1,7 @@
+"""
+Classes and methods relating to archive records.
+"""
+
 import abc
 import copy
 import io
@@ -9,6 +13,13 @@ from .header import ArchiveRecordHeader
 
 
 class ArchiveRecord(abc.ABC):
+    """
+    ``ArchiveRecord`` is the base class for all records (files and directories) within
+    the archive. ``ArchiveRecord`` is abstract and cannot be instantiated; instead, an
+    instance of one of the derived classes (``ArchiveFile`` or ``ArchiveDirectory``)
+    should be created.
+    """
+
     @property
     def header(self) -> ArchiveRecordHeader:
         """
@@ -97,6 +108,10 @@ class ArchiveRecord(abc.ABC):
 
 
 class ArchiveFile(ArchiveRecord, io.BytesIO):  # type: ignore
+    """
+    An ``ArchiveFile`` represents a single file within the archive.
+    """
+
     def __init__(
         self,
         name: str = "",
@@ -294,7 +309,13 @@ class ArchiveDirectory(ArchiveRecord, list):
         """
         return self
 
-    def items(self):
+    def items(self) -> typing.List[typing.Tuple[str, ArchiveRecord]]:
+        """
+        Get a list of key-value pairs for all records in this directory. The key is the
+        record name, and the value is the record itself.
+
+        :return: List of key-value pairs.
+        """
         return list(zip(self.keys(), self.values()))
 
     def __getitem__(self, arg):
@@ -320,6 +341,13 @@ class ArchiveDirectory(ArchiveRecord, list):
         super().__setitem__(index, self._validate(item))
 
     def __add__(self, other):
+        """
+        Concatenate this directory's children with the provided list.
+        If the provided list is another directory, it will be merged with this.
+
+        :param other: List to be concatenated.
+        :return: A directory with the list concatenated.
+        """
         if isinstance(other, ArchiveDirectory):
             dup = copy.deepcopy(self)
             dup.merge(other)
@@ -327,17 +355,31 @@ class ArchiveDirectory(ArchiveRecord, list):
         return super().__add__(other)
 
     def __contains__(self, other):
+        """
+        Check whether the given record is contained within this directory.
+        If a string is provided instead of a record, this will check if a record by
+        that name exists within this directory.
+        """
         if isinstance(other, str):
             return self.get_child(other) is not None
         return super().__contains__(other)
 
     def insert(self, index, item):
+        """
+        Insert the given record as a child of this directory at the given index.
+        """
         super().insert(index, self._validate(item))
 
     def append(self, item):
+        """
+        Append the given record as a child of this directory.
+        """
         super().append(self._validate(item))
 
     def extend(self, other):
+        """
+        Append all the items in the given list as children of this directory.
+        """
         super().extend(self._validate(item) for item in other)
 
     def _validate(self, record: ArchiveRecord) -> ArchiveRecord:
@@ -358,6 +400,11 @@ class ArchiveDirectory(ArchiveRecord, list):
         return record
 
     def merge(self, other: "ArchiveDirectory"):
+        """
+        Merge the contents of another directory into this directory.
+
+        :param other: The other directory.
+        """
         if other.name != self.name:
             raise ValueError("directories must have the same name to be merged")
         for child in other:
@@ -377,18 +424,33 @@ class ArchiveDirectory(ArchiveRecord, list):
             self_child.merge(child)
 
     def directories(self):
+        """
+        A generator which iterates through all directories that are direct children of
+        this one.
+        """
         for child in self:
             if not isinstance(child, ArchiveDirectory):
                 continue
             yield child
 
     def files(self):
+        """
+        A generator which iterates through all files that are direct children of this
+        directory.
+        """
         for child in self:
             if not isinstance(child, ArchiveFile):
                 continue
             yield child
 
     def _walk(self, path):
+        """
+        A generator which visits each directory in the archive (in order, recursively).
+
+        :param path: The starting path (forms the prefix of what will be returned).
+        :return: The directory's path (represented as a list) and the directory record
+            itself.
+        """
         path.append(self.name)
         yield path, self
         for record in self.directories():

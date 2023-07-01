@@ -1,3 +1,8 @@
+"""
+Each record within the archive contains a record header. This module provides utilities
+for parsing or generating that header.
+"""
+
 import typing
 
 from ...util import LC_CODEC
@@ -5,6 +10,11 @@ from ..common import CarCompressionType, CarRecordType
 
 
 class ArchiveRecordHeader:
+    """
+    An ``ArchiveRecordHeader`` represents a de-serialized record header. It provides
+    properties to access the underlying fields.
+    """
+
     MAX_NAME_SIZE = 15
 
     def __init__(

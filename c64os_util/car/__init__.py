@@ -1,5 +1,5 @@
 """
-car module docstring
+Classes and methods related to C64 Archive (``.car``) files.
 """
 
 from .archive import C64Archive

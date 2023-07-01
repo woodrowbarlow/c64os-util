@@ -1,3 +1,7 @@
+"""
+Implementation details for the PETSCII text codec.
+"""
+
 import codecs
 import typing
 
@@ -88,20 +92,52 @@ ENCODING_TABLES = {
 
 
 def encode_fn(table):
+    """
+    Get an encoding function that operates on the provided table.
+    :param table: The encoding table.
+    :return: An encoding function.
+    """
+
     def encode(text: str, errors: str = "strict") -> typing.Tuple[bytes, int]:
+        """
+        Encode the provided text to binary, using the encoding specified by the outer
+        function.
+        :param text: Text to encode.
+        :param errors: Error handling mode.
+        :return: The size and encoded data as a tuple.
+        """
         return codecs.charmap_encode(text, errors, table)
 
     return encode
 
 
 def decode_fn(table):
+    """
+    Get a decoding function that operates on the provided table.
+    :param table: The decoding table.
+    :return: A decoding function.
+    """
+
     def decode(binary: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
+        """
+        Decode the provided binary to text, using the encoding specified by the outer
+        function.
+        :param binary: Data to decode.
+        :param errors: Error handling mode.
+        :return: The size and decoded data as a tuple.
+        """
         return codecs.charmap_decode(binary, errors, table)
 
     return decode
 
 
 def codec_info(encoding: str) -> codecs.CodecInfo:
+    """
+    Generate a CodecInfo object for the specified encoding.
+    :param encoding: The encoding name.
+    :return: A CodecInfo object.
+    :raises: KeyError
+    """
     e_table = ENCODING_TABLES[encoding]
     d_table = DECODING_TABLES[encoding]
     return codecs.CodecInfo(encode_fn(e_table), decode_fn(d_table), name=encoding)
