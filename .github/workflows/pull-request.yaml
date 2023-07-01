@@ -1,8 +1,8 @@
-name: pr-check
+name: pull-request
 on: [pull_request]
 jobs:
   code-quality:
-    name: code quality
+    name: Check code quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
       - name: Run linters
         run: poetry run poe lint
   docs-quality:
-    name: docs quality
+    name: Check docs quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
       - name: Run docs checks
         run: poetry run poe docs-check
   test:
-    name: test suite
+    name: Run test suite
     strategy:
       matrix:
         os: [Ubuntu, MacOS, Windows]
