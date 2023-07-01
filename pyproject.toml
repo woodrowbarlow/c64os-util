@@ -28,6 +28,7 @@ car = 'scripts.car:main'
 [tool.poe.tasks]
 test = "python -u -m unittest discover tests"
 doc = "sphinx-build -M html docs docs/_build"
+lint = "black ."
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.1"

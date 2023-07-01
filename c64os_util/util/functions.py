@@ -1,7 +1,16 @@
 import os
 
 
-def copy_buffer(src, dest, src_whence=os.SEEK_CUR, src_seek=0, dest_whence=os.SEEK_CUR, dest_seek=0, max_size=-1, chunk_size=1024):
+def copy_buffer(
+    src,
+    dest,
+    src_whence=os.SEEK_CUR,
+    src_seek=0,
+    dest_whence=os.SEEK_CUR,
+    dest_seek=0,
+    max_size=-1,
+    chunk_size=1024,
+):
     src.seek(src_seek, src_whence)
     dest.seek(dest_seek, dest_whence)
     count = 0

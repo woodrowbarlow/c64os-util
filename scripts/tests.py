@@ -1,6 +1,5 @@
 import subprocess
 
+
 def main():
-    subprocess.run(
-        ['python', '-u', '-m', 'unittest', 'discover', 'tests']
-    )
+    subprocess.run(["python", "-u", "-m", "unittest", "discover", "tests"])

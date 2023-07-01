@@ -10,7 +10,6 @@ from ...util import copy_buffer
 
 
 class ArchiveRecord(abc.ABC):
-
     @property
     def header(self) -> ArchiveRecordHeader:
         """
@@ -19,12 +18,11 @@ class ArchiveRecord(abc.ABC):
         :return: The record header.
         """
         return ArchiveRecordHeader(
-            name = self.name,
-            size = self.size,
-            record_type = self.record_type,
-            compression_type = self.compression_type,
+            name=self.name,
+            size=self.size,
+            record_type=self.record_type,
+            compression_type=self.compression_type,
         )
-
 
     @property
     def name(self) -> str:
@@ -34,7 +32,6 @@ class ArchiveRecord(abc.ABC):
         :return: The record name.
         """
         return self._name
-
 
     @name.setter
     def name(self, value: str):
@@ -46,7 +43,6 @@ class ArchiveRecord(abc.ABC):
         assert len(value) <= ArchiveRecordHeader.MAX_NAME_SIZE
         self._name = value
 
-
     @property
     def size(self) -> int:
         """
@@ -56,7 +52,6 @@ class ArchiveRecord(abc.ABC):
         """
         # must be implemented in derived class
         raise NotImplementedError()
-
 
     @property
     def record_type(self) -> CarRecordType:
@@ -78,7 +73,6 @@ class ArchiveRecord(abc.ABC):
         # must be implemented in derived class
         raise NotImplementedError()
 
-
     def serialize(self, buffer: typing.BinaryIO):
         """
         Convert this record into binary data and write it to a buffer.
@@ -88,12 +82,11 @@ class ArchiveRecord(abc.ABC):
         # must be implemented in derived class
         raise NotImplementedError()
 
-
     @staticmethod
-    def deserialize(buffer: typing.BinaryIO) -> 'ArchiveRecord':
+    def deserialize(buffer: typing.BinaryIO) -> "ArchiveRecord":
         """
         Read binary data from a buffer and parse it into a record object.
-        
+
         :param buffer: The buffer from which to read.
         :return: The parsed record object.
         """
@@ -104,13 +97,13 @@ class ArchiveRecord(abc.ABC):
 
 
 class ArchiveFile(ArchiveRecord, io.BytesIO):
-
-
     def __init__(
-        self, name: str = '',
+        self,
+        name: str = "",
         file_type: CarRecordType = CarRecordType.SEQFILE,
         compression_type: CarCompressionType = CarCompressionType.NONE,
-        *args, **kwargs,
+        *args,
+        **kwargs,
     ):
         """
         Create a new file record.
@@ -125,7 +118,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         self.compression_type = compression_type
         super().__init__(*args, **kwargs)
 
-
     @property
     def size(self) -> int:
         """
@@ -134,7 +126,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         :return: The record size.
         """
         return self.getbuffer().nbytes
-
 
     @property
     def record_type(self):
@@ -145,7 +136,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         """
         return self.file_type
 
-
     @property
     def file_type(self) -> CarRecordType:
         """
@@ -154,7 +144,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         :return: The file type.
         """
         return self._file_type
-
 
     @file_type.setter
     def file_type(self, value: CarRecordType):
@@ -165,7 +154,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         """
         self._file_type = value
 
-
     @property
     def compression_type(self) -> CarCompressionType:
         """
@@ -174,7 +162,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         :return: The file compression type.
         """
         return self._compression_type
-
 
     @compression_type.setter
     def compression_type(self, value: CarCompressionType):
@@ -185,7 +172,6 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         """
         self._compression_type = value
 
-
     def serialize(self, buffer: typing.BinaryIO):
         """
         Convert this record into binary data and write it to a buffer.
@@ -195,12 +181,13 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         self.header.serialize(buffer)
         copy_buffer(self, buffer, src_whence=os.SEEK_SET)
 
-
     @staticmethod
-    def _deserialize(header: ArchiveRecordHeader, buffer: typing.BinaryIO) -> 'ArchiveFile':
+    def _deserialize(
+        header: ArchiveRecordHeader, buffer: typing.BinaryIO
+    ) -> "ArchiveFile":
         """
         Read binary data from a buffer and parse it into a record object.
-        
+
         :param header: The header (parsed from the buffer already).
         :param buffer: The buffer from which to read.
         :return: The parsed file record object.
@@ -208,7 +195,7 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         record = ArchiveFile(
             name=header.name,
             file_type=header.record_type,
-            compression_type=header.compression_type
+            compression_type=header.compression_type,
         )
         copy_buffer(buffer, record, max_size=header.size)
         return record
@@ -240,7 +227,7 @@ class ArchiveDirectory(ArchiveRecord, list):
         print(d['bar'].file_type)
     """
 
-    def __init__(self, name: str = '', iterable: list[ArchiveRecord] = None):
+    def __init__(self, name: str = "", iterable: list[ArchiveRecord] = None):
         """
         Create a new directory record.
 
@@ -252,7 +239,6 @@ class ArchiveDirectory(ArchiveRecord, list):
             iterable = []
         super().__init__(self._validate(item) for item in iterable)
 
-
     @property
     def size(self) -> int:
         """
@@ -261,7 +247,6 @@ class ArchiveDirectory(ArchiveRecord, list):
         :return: The record size.
         """
         return len(self)
-
 
     @property
     def record_type(self) -> CarRecordType:
@@ -281,7 +266,6 @@ class ArchiveDirectory(ArchiveRecord, list):
         """
         return CarCompressionType.NONE
 
-
     def get_child(self, name: str) -> ArchiveRecord:
         """
         Get a child record by name.
@@ -293,15 +277,13 @@ class ArchiveDirectory(ArchiveRecord, list):
                 return child
         return None
 
-
     def keys(self):
         """
         Get a list of the names of all records in this directory.
 
         :return: List of record names.
         """
-        return [ child.name for child in self ]
-
+        return [child.name for child in self]
 
     def values(self):
         """
@@ -311,15 +293,13 @@ class ArchiveDirectory(ArchiveRecord, list):
         """
         return self
 
-
     def items(self):
         return list(zip(self.keys(), self.values()))
-
 
     def __getitem__(self, arg):
         """
         Get a child record by numeric index, or by name.
-        
+
         :return: The matching record.
         """
         if isinstance(arg, int):
@@ -327,8 +307,7 @@ class ArchiveDirectory(ArchiveRecord, list):
         child = self.get_child(arg)
         if child is not None:
             return child
-        raise KeyError(f'{self.name} does not contain {arg}')
-
+        raise KeyError(f"{self.name} does not contain {arg}")
 
     def __setitem__(self, index: int, item: ArchiveRecord):
         """
@@ -339,7 +318,6 @@ class ArchiveDirectory(ArchiveRecord, list):
         """
         super().__setitem__(index, self._validate(item))
 
-
     def __add__(self, other):
         if isinstance(other, ArchiveDirectory):
             s = copy.deepcopy(self)
@@ -347,24 +325,19 @@ class ArchiveDirectory(ArchiveRecord, list):
             return s
         return super().__add__(other)
 
-
     def __contains__(self, other):
         if isinstance(other, str):
             return self.get_child(other) is not None
         return super().__contains__(other)
 
-
     def insert(self, index: int, item: ArchiveRecord):
         super().insert(index, self._validate(item))
-
 
     def append(self, item: ArchiveRecord):
         super().append(self._validate(item))
 
-
     def extend(self, other: list[ArchiveRecord]):
         super().extend(self._validate(item) for item in other)
-
 
     def _validate(self, record: ArchiveRecord) -> ArchiveRecord:
         """
@@ -377,11 +350,12 @@ class ArchiveDirectory(ArchiveRecord, list):
             raise ValueError(f"a directory can only contain files or other directories")
         child = self.get_child(record.name)
         if child is not None:
-            raise ValueError(f"a directory or file already exists in {self.name} with name {child.name}")
+            raise ValueError(
+                f"a directory or file already exists in {self.name} with name {child.name}"
+            )
         return record
 
-
-    def merge(self, other: 'ArchiveDirectory'):
+    def merge(self, other: "ArchiveDirectory"):
         if other.name != self.name:
             raise ValueError("directories must have the same name to be merged")
         for child in other:
@@ -391,11 +365,14 @@ class ArchiveDirectory(ArchiveRecord, list):
                 self.append(child)
                 continue
             if not isinstance(child, ArchiveDirectory):
-                raise ValueError(f"both directories contain a record named {child.name}")
+                raise ValueError(
+                    f"both directories contain a record named {child.name}"
+                )
             if not isinstance(self_child, ArchiveDirectory):
-                raise ValueError(f"both directories contain a record named {child.name}")
+                raise ValueError(
+                    f"both directories contain a record named {child.name}"
+                )
             self_child.merge(child)
-
 
     def directories(self):
         for child in self:
@@ -403,20 +380,17 @@ class ArchiveDirectory(ArchiveRecord, list):
                 continue
             yield child
 
-
     def files(self):
         for child in self:
             if not isinstance(child, ArchiveFile):
                 continue
             yield child
 
-
     def _walk(self, path):
         path.append(self.name)
         yield path, self
         for record in self.directories():
             yield from record._walk(path)
-
 
     def serialize(self, buffer: typing.BinaryIO):
         """
@@ -428,12 +402,13 @@ class ArchiveDirectory(ArchiveRecord, list):
         for child in self:
             child.serialize(buffer)
 
-
     @staticmethod
-    def _deserialize(header: ArchiveRecordHeader, buffer: typing.BinaryIO) -> 'ArchiveDirectory':
+    def _deserialize(
+        header: ArchiveRecordHeader, buffer: typing.BinaryIO
+    ) -> "ArchiveDirectory":
         """
         Read binary data from a buffer and parse it into a record object.
-        
+
         :param header: The header (parsed from the buffer already).
         :param buffer: The buffer from which to read.
         :return: The parsed directory record object.
