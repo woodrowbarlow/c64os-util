@@ -397,6 +397,27 @@ class ArchiveDirectory(ArchiveRecord, list):
             self_child.merge(child)
 
 
+    def directories(self):
+        for child in self:
+            if not isinstance(child, ArchiveDirectory):
+                continue
+            yield child
+
+
+    def files(self):
+        for child in self:
+            if not isinstance(child, ArchiveFile):
+                continue
+            yield child
+
+
+    def _walk(self, path):
+        path.append(self.name)
+        yield path, self
+        for record in self.directories():
+            yield from record._walk(path)
+
+
     def serialize(self, buffer: typing.BinaryIO):
         """
         Convert this record into binary data and write it to a buffer.

@@ -149,6 +149,22 @@ class C64Archive:
         raise ValueError()
 
 
+    def walk(self):
+        if self.root is None or not isinstance(self.root, ArchiveDirectory):
+            return
+        yield from self.root._walk(path=[])
+
+
+    def __iter__(self):
+        if self.root is None:
+            return
+        if not isinstance(self.root, ArchiveDirectory):
+            yield self.root
+            return
+        for path, record in self.walk():
+            for r in record.files():
+                yield path + [ r.name ], r
+
 
     def __getitem__(self, arg):
         if self.root is None:
