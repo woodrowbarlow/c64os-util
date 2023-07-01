@@ -2,7 +2,7 @@ import datetime
 import os
 import typing
 
-from ..util import LC_CODEC, copy_buffer
+from ..util import copy_buffer
 from .common import CarArchiveType, CarCompressionType, CarRecordType
 from .header import ArchiveHeader
 from .record import ArchiveDirectory, ArchiveFile, ArchiveRecord
@@ -46,9 +46,9 @@ class C64Archive:
         path = path[1:]
         if start is None or start.name != head:
             raise ValueError()
-        if not len(path):
+        if not path:
             return start
-        if isinstance(start, ArchiveFile):
+        if not isinstance(start, ArchiveDirectory):
             raise ValueError()
         head = path[0]
         if create_directories and head not in start:
@@ -72,11 +72,21 @@ class C64Archive:
             raise ValueError()
         self.root = child
 
-    def ls(self, path: str, sep: str = os.path.sep):
+    def ls(self, path: str, sep: str = os.path.sep):  # pylint: disable=C0103
         parts = path.split(sep)
         return self._find_path(self.root, parts)
 
-    def rm(
+    def _rm_root(self, name: str, missing_ok: bool, recursive: bool):
+        if self.root is not None and self.root.name == name:
+            if isinstance(self.root, ArchiveDirectory):
+                if self.root.size and not recursive:
+                    raise ValueError()
+            self.root = None
+            return
+        if not missing_ok:
+            raise ValueError()
+
+    def rm(  # pylint: disable=C0103
         self,
         path: str,
         sep: str = os.path.sep,
@@ -86,15 +96,8 @@ class C64Archive:
         parts = path.split(sep)
         tail = parts[-1]
         parts = parts[:-1]
-        if not len(parts):
-            if self.root is not None and self.root.name == tail:
-                if isinstance(self.root, ArchiveDirectory):
-                    if self.root.size and not recursive:
-                        raise ValueError()
-                self.root = None
-                return
-            if not missing_ok:
-                raise ValueError()
+        if not parts:
+            self._rm_root(tail, missing_ok, recursive)
             return
         parent = self._find_path(self.root, parts)
         if parent is None:
@@ -135,7 +138,7 @@ class C64Archive:
             raise ValueError()
         return record
 
-    def touch(
+    def touch(  # pylint: disable=R0913
         self,
         path: str,
         sep: str = os.path.sep,
@@ -162,7 +165,7 @@ class C64Archive:
     def walk(self):
         if self.root is None or not isinstance(self.root, ArchiveDirectory):
             return
-        yield from self.root._walk(path=[])
+        yield from self.root._walk(path=[])  # pylint: disable=W0212
 
     def __iter__(self):
         if self.root is None:
@@ -171,8 +174,8 @@ class C64Archive:
             yield self.root
             return
         for path, record in self.walk():
-            for r in record.files():
-                yield path + [r.name], r
+            for file_rec in record.files():
+                yield path + [file_rec.name], file_rec
 
     def __getitem__(self, arg):
         if self.root is None:

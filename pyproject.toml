@@ -100,10 +100,15 @@ _clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
 
   [tool.poe.tasks.check]
   help     = "Run all checks on the code base"
-  sequence = ["style", "test"]
+  sequence = ["style", "lint", "test"]
 
 [tool.isort]
 profile = "black"
+
+[tool.pylint]
+max-line-length = 88
+# re-enable these soon...
+disable = [ 'C0114', 'C0115', 'C0116' ]
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.1"

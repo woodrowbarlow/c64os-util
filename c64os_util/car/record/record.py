@@ -1,7 +1,6 @@
 import abc
 import copy
 import io
-import os
 import typing
 
 from ...util import copy_buffer
@@ -92,18 +91,17 @@ class ArchiveRecord(abc.ABC):
         """
         header = ArchiveRecordHeader.deserialize(buffer)
         if header.record_type.is_directory():
+            # pylint: disable=W0212
             return ArchiveDirectory._deserialize(header, buffer)
-        return ArchiveFile._deserialize(header, buffer)
+        return ArchiveFile._deserialize(header, buffer)  # pylint: disable=W0212
 
 
-class ArchiveFile(ArchiveRecord, io.BytesIO):
+class ArchiveFile(ArchiveRecord, io.BytesIO):  # type: ignore
     def __init__(
         self,
         name: str = "",
         file_type: CarRecordType = CarRecordType.SEQFILE,
         compression_type: CarCompressionType = CarCompressionType.NONE,
-        *args,
-        **kwargs,
     ):
         """
         Create a new file record.
@@ -116,7 +114,7 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         self.name = name
         self.file_type = file_type
         self.compression_type = compression_type
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     @property
     def size(self) -> int:
@@ -179,7 +177,8 @@ class ArchiveFile(ArchiveRecord, io.BytesIO):
         :param buffer: The buffer into which to write.
         """
         self.header.serialize(buffer)
-        copy_buffer(self, buffer, src_whence=os.SEEK_SET)
+        self.seek(0)
+        copy_buffer(self, buffer)
 
     @staticmethod
     def _deserialize(
@@ -322,9 +321,9 @@ class ArchiveDirectory(ArchiveRecord, list):
 
     def __add__(self, other):
         if isinstance(other, ArchiveDirectory):
-            s = copy.deepcopy(self)
-            s.merge(other)
-            return s
+            dup = copy.deepcopy(self)
+            dup.merge(other)
+            return dup
         return super().__add__(other)
 
     def __contains__(self, other):
@@ -349,11 +348,12 @@ class ArchiveDirectory(ArchiveRecord, list):
         :param record: The record to be inserted.
         """
         if not isinstance(record, ArchiveRecord):
-            raise ValueError(f"a directory can only contain files or other directories")
+            raise ValueError("a directory can only contain files or other directories")
         child = self.get_child(record.name)
         if child is not None:
             raise ValueError(
-                f"a directory or file already exists in {self.name} with name {child.name}"
+                "a directory or file already exists in "
+                f"{self.name} with name {child.name}"
             )
         return record
 
@@ -392,7 +392,7 @@ class ArchiveDirectory(ArchiveRecord, list):
         path.append(self.name)
         yield path, self
         for record in self.directories():
-            yield from record._walk(path)
+            yield from record._walk(path)  # pylint: disable=W0212
 
     def serialize(self, buffer: typing.BinaryIO):
         """

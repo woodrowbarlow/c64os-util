@@ -5,8 +5,8 @@ from ..util import LC_CODEC
 from .common import CarArchiveType
 
 
-class ArchiveTimestamp:
-    def __init__(
+class ArchiveTimestamp:  # pylint: disable=R0902
+    def __init__(  # pylint: disable=R0913
         self,
         year: int = 1900,
         month: int = 0,
@@ -88,9 +88,9 @@ class ArchiveTimestamp:
     def deserialize(buffer: typing.BinaryIO) -> "ArchiveTimestamp":
         fields = ["year", "month", "day", "hour", "minute"]
         values = buffer.read(len(fields))
-        d = dict(zip(fields, values))
-        d["year"] += 1900
-        return ArchiveTimestamp(**d)
+        kwargs = dict(zip(fields, values))
+        kwargs["year"] += 1900
+        return ArchiveTimestamp(**kwargs)
 
 
 class ArchiveHeader:
