@@ -19,15 +19,23 @@ include = [
 packages = [{include = "c64os_util"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8.1"
 cbmcodecs2 = "^1.2"
 
 [tool.poetry.scripts]
-tests = 'scripts.tests:main'
-docs = 'scripts.docs:main'
+car = 'scripts.car:main'
+
+[tool.poe.tasks]
+test = "python -u -m unittest discover tests"
+doc = "sphinx-build -M html docs docs/_build"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+poethepoet = "^0.20.0"
 
 [build-system]
 requires = ["poetry-core"]
