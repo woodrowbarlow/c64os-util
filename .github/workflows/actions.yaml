@@ -1,0 +1,63 @@
+name: pr-check
+on: [pull_request]
+jobs:
+  code-quality:
+    name: code quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Run style checks
+        run: poetry run poe style
+
+      - name: Run linters
+        run: poetry run poe lint
+  docs-quality:
+    name: docs quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: poetry install --with dev --with docs
+
+      - name: Run docs checks
+        run: poetry run poe docs-check
+  test:
+    name: test suite
+    strategy:
+      matrix:
+        os: [Ubuntu, MacOS, Windows]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Run test
+        run: poetry run poe test
