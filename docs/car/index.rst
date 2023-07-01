@@ -1,12 +1,27 @@
-C64 Archives (.car files)
-=========================
+C64 Archives (``.car`` files)
+=============================
 
-A C64 Archive (``.car`` file) is similar to a tarball (``.tar`` or ``.tar.gz`` file), containing files and/or directories, possibly compressed, all concatenated into a single file for easier transfer between drives or machines.
+CLI Tools
+---------
 
-That is to say: multiple files can be combined into one, preserving their directory structure for when those files are re-extracted later.
+High-Level API
+--------------
 
-C64 Archives can also serve as "installers" for software and updates. Any archive with the "install" type can be automatically extracted to the OS root by double-clicking the file inside C64 OS.
+.. automodule:: c64os_util.car
+   :members:
 
-An archive must contain a single root entry -- which means if you want to store multiple files, the root entry must be a directory.
+.. toctree::
+   :maxdepth: 2
 
-Note: For now, compression is not supported.
+   api/archive
+
+Low-Level API
+-------------
+
+.. automodule:: c64os_util.car.record
+   :members:
+
+.. toctree::
+   :maxdepth: 2
+
+   api/record
