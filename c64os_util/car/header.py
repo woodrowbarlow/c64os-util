@@ -1,8 +1,8 @@
 import datetime
 import typing
 
-from .common import CarArchiveType
 from ..util import LC_CODEC
+from .common import CarArchiveType
 
 
 class ArchiveTimestamp:

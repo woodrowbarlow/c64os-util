@@ -1,15 +1,15 @@
 import datetime
-import os
 import io
+import os
 import unittest
 
 from c64os_util.car import (
-    C64Archive,
-    ArchiveFile,
     ArchiveDirectory,
+    ArchiveFile,
+    C64Archive,
     CarArchiveType,
-    CarRecordType,
     CarCompressionType,
+    CarRecordType,
 )
 
 

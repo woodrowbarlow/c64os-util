@@ -1,12 +1,12 @@
 import abc
+import copy
 import io
 import os
-import copy
 import typing
 
-from .header import ArchiveRecordHeader
-from ..common import CarRecordType, CarCompressionType
 from ...util import copy_buffer
+from ..common import CarCompressionType, CarRecordType
+from .header import ArchiveRecordHeader
 
 
 class ArchiveRecord(abc.ABC):

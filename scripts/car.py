@@ -2,8 +2,9 @@
 import argparse
 import os
 import sys
-import c64os_util
 from importlib import metadata
+
+import c64os_util
 
 
 def create(args):

@@ -26,17 +26,79 @@ cbmcodecs2 = "^1.2"
 car = 'scripts.car:main'
 
 [tool.poe.tasks]
-test = "python -u -m unittest discover tests"
-doc = "sphinx-build -M html docs docs/_build"
-lint = "black ."
+_clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
+
+  [tool.poe.tasks.docs]
+  help = "Build the docs using Sphinx"
+  cmd  = "sphinx-build docs docs/_build"
+  deps = ["_clean_docs"]
+
+  [tool.poe.tasks.format-isort]
+  help = "Run isort on the code base"
+  cmd  = "isort ."
+
+  [tool.poe.tasks.format-black]
+  help = "Run black on the code base"
+  cmd  = "black ."
+
+  [tool.poe.tasks.format]
+  help     = "Run formating tools on the code base"
+  sequence = ["format-isort", "format-black"]
+
+  [tool.poe.tasks.clean]
+  help = "Remove generated files"
+  cmd  = """
+    rm -rf .coverage
+           .mypy_cache
+           .pytest_cache
+           ./**/__pycache__
+           dist
+           htmlcov
+           ./docs/_build
+  """
+
+  [tool.poe.tasks.test]
+  help = "Run unit and feature tests"
+  cmd  = "pytest --cov=poethepoet"
+
+  [tool.poe.tasks.types]
+  help = "Run the type checker"
+  cmd  = "mypy poethepoet --ignore-missing-imports"
+
+  [tool.poe.tasks.lint]
+  help = "Run the linter"
+  cmd  = "pylint poethepoet"
+
+  [tool.poe.tasks.style-black]
+  help = "Validate black code style"
+  cmd  = "black . --check --diff"
+
+  [tool.poe.tasks.style-isort]
+  help = "Validate isort code style"
+  cmd  = "isort . --check --diff"
+
+  [tool.poe.tasks.style]
+  help = "Validate code style"
+  sequence = ["style-isort", "style-black"]
+
+  [tool.poe.tasks.check]
+  help     = "Run all checks on the code base"
+  sequence = ["style", "types", "lint", "test"]
+
+[tool.isort]
+profile = "black"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
-flake8 = "^6.0.0"
 poethepoet = "^0.20.0"
+isort = "^5.12.0"
+pytest = "^7.4.0"
+mypy = "^1.4.1"
+pylint = "^2.17.4"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]

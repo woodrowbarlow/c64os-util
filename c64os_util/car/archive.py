@@ -1,11 +1,11 @@
 import datetime
-import typing
 import os
+import typing
 
-from .common import CarArchiveType, CarRecordType, CarCompressionType
-from .header import ArchiveHeader
-from .record import ArchiveRecord, ArchiveDirectory, ArchiveFile
 from ..util import LC_CODEC, copy_buffer
+from .common import CarArchiveType, CarCompressionType, CarRecordType
+from .header import ArchiveHeader
+from .record import ArchiveDirectory, ArchiveFile, ArchiveRecord
 
 
 class C64Archive:

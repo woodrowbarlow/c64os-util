@@ -1,7 +1,7 @@
 import typing
 
-from ..common import CarRecordType, CarCompressionType
 from ...util import LC_CODEC
+from ..common import CarCompressionType, CarRecordType
 
 
 class ArchiveRecordHeader:
