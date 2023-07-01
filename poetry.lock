@@ -94,16 +94,6 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
-name = "cbmcodecs2"
-version = "1.2"
-description = "Python codecs for CBM PETSCII and Screencode encodings"
-optional = false
-python-versions = "*"
-files = [
-    {file = "cbmcodecs2-1.2.tar.gz", hash = "sha256:bcae6efa0246efb3793b7fa4f01ccaafe2ba5a528d71e3dbcbd910963b074595"},
-]
-
-[[package]]
 name = "certifi"
 version = "2023.5.7"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -1297,4 +1287,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<4.0"
-content-hash = "78743e3d5e0d67241317090d6b77f0ad922df800dd75b9efdd4bb3cc0e2057f0"
+content-hash = "2913904c107758131d826d14e5e236ca8fd1a48d8cec7db7392457067ea2caed"

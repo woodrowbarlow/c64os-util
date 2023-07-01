@@ -19,8 +19,7 @@ include = [
 packages = [{include = "c64os_util"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4.0"
-cbmcodecs2 = "^1.2"
+python = ">=3.10,<4.0"
 
 [tool.poetry.scripts]
 car = 'scripts.car:main'
