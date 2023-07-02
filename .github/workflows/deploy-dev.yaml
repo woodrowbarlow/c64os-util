@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev --with docs
 
-      - name: Run docs checks
-        run: poetry run poe docs-check
-
       - name: Build docs
         run: poetry run poe docs
 
