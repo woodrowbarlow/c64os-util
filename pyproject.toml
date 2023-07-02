@@ -38,13 +38,6 @@ _clean_docs.script = "shutil:rmtree('docs/_build', ignore_errors=1)"
   cwd    = "./docs"
   deps   = ["docs"]
 
-  [tool.poe.tasks.docs-check]
-  help = "Validate rst syntax in the docs"
-  sequence = [
-    { cmd  = "rstcheck -r docs --ignore-roles bash,toml,sh,python --ignore-substitutions V" },
-    "docs -b linkcheck"
-  ]
-
   [tool.poe.tasks.format-isort]
   help = "Run isort on the code base"
   cmd  = "isort ."
@@ -110,7 +103,6 @@ max-line-length = 88
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.1"
 livereload = "^2.6.3"
-rstcheck = "^6.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
