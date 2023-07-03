@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "c64os-util"
-version = "0.1.0"
+version = "0.0.1"
 description = "A collection of utilities for dealing with C64 OS files."
 authors = ["voidstar <voidstar@anachronauts.club>"]
 readme = "README.md"
