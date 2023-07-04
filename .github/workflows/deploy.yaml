@@ -15,8 +15,6 @@ jobs:
 
       - name: Check PyPI version
         uses: maybe-hello-world/pyproject-check-version@v1
-        with:
-          pyproject-path: "./pyproject.toml"
   deploy:
     name: Deploy package
     runs-on: ubuntu-latest
