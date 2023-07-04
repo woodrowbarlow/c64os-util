@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       remote: ${{ fromJSON(env.fetch-api-data).info.version }}
-      local: ${{ steps.check-local.outputs.pkg_version }}
+      local: ${{ env.pkg_version }}
     steps:
       - uses: actions/checkout@v3
 
@@ -28,7 +28,7 @@ jobs:
 
       - name: Check package version
         id: check-local
-        run: pkg_version=$(poetry version -s)
+        run: echo "pkg_version=$(poetry version -s)" >> "$GITHUB_ENV" 
   deploy:
     name: Deploy package
     runs-on: ubuntu-latest
