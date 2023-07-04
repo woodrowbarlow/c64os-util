@@ -7,9 +7,6 @@ jobs:
   check-version:
     name: Check package version
     runs-on: ubuntu-latest
-    outputs:
-      remote: ${{ fromJSON(env.fetch-api-data).info.version }}
-      local: ${{ env.pkg_version }}
     steps:
       - uses: actions/checkout@v3
 
@@ -24,23 +21,12 @@ jobs:
         uses: JamesIves/fetch-api-data-action@v2
         with:
           endpoint: https://pypi.org/pypi/c64os-util/json
-      - run: echo ${{ fromJSON(env.fetch-api-data).info.version }}
 
-      - run: echo "$GITHUB_ENV"
-      - run: poetry version -s
-      - run: echo "pkg_version=$(poetry version -s)"
-      - name: Check package version
-        run: echo "pkg_version=$(poetry version -s)" >> "$GITHUB_ENV"
-      - run: echo "$GITHUB_ENV"
-      - run: echo ${{ env.pkg_version }}
+      - name: Set remote version
+        run: echo "REMOTE=${{ fromJSON(env.fetch-api-data).info.version }}" >> "$GITHUB_OUTPUT"
 
-  print-dbg:
-    name: Print statements for debug
-    runs-on: ubuntu-latest
-    needs: check-version
-    steps:
-      - run: echo ${{ needs.check-version.remote }}
-      - run: echo ${{ needs.check-version.local }}
+      - name: Set local version
+        run: echo "LOCAL=$(poetry version -s)" >> "$GITHUB_OUTPUT"
   deploy:
     name: Deploy package
     runs-on: ubuntu-latest
@@ -50,7 +36,7 @@ jobs:
     permissions:
       id-token: write
     needs: check-version
-    if: ${{ needs.check-version.local != needs.check-version.remote }}
+    if: ${{ needs.check-version.LOCAL != needs.check-version.REMOTE }}
     steps:
       - uses: actions/checkout@v3
 
