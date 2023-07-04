@@ -24,7 +24,7 @@ jobs:
         id: check-remote
         uses: JamesIves/fetch-api-data-action@v2
         with:
-          endpoint: https://pypi.org/pypi/c64-os/json
+          endpoint: https://pypi.org/pypi/c64os-util/json
 
       - name: Check package version
         id: check-local
