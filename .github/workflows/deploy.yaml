@@ -36,7 +36,7 @@ jobs:
     permissions:
       id-token: write
     needs: check-version
-    if: ${{ needs.check-version.LOCAL != needs.check-version.REMOTE }}
+    if: ${{ needs.check-version.outputs.LOCAL != needs.check-version.outputs.REMOTE }}
     steps:
       - uses: actions/checkout@v3
 
