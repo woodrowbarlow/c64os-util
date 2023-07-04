@@ -8,23 +8,8 @@ jobs:
     name: Check package version
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.check-pypi-version.outputs.local_version }}
-      increased: ${{ steps.check-pypi-version.outputs.local_version_is_higher }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Check PyPI version
-        uses: maybe-hello-world/pyproject-check-version@v1
-  deploy:
-    name: Deploy package
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/c64os-util
-    permissions:
-      id-token: write
-    needs: check-version
-    if: ${{ needs.check-version.increased == 'true' }}
+      remote: ${{ fromJSON(env.fetch-api-data).info.version }}
+      local: ${{ steps.check-local.outputs.pkg_version }}
     steps:
       - uses: actions/checkout@v3
 
@@ -34,6 +19,38 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
+      - name: Check PyPI version
+        id: check-remote
+        uses: JamesIves/fetch-api-data-action@v2
+        with:
+          endpoint: https://pypi.org/pypi/c64-os/json
+
+      - name: Check package version
+        id: check-local
+        run: pkg_version=$(poetry version -s)
+  deploy:
+    name: Deploy package
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/c64os-util
+    permissions:
+      id-token: write
+    needs: check-version
+    if: ${{ needs.check-version.local != needs.check-version.remote }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Build package
         run: poetry build
@@ -45,4 +62,4 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: v${{ needs.check-version.version }}
+          custom_tag: v${{ needs.check-version.local }}
