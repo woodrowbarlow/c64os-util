@@ -8,8 +8,8 @@ jobs:
     name: Check package version
     runs-on: ubuntu-latest
     outputs:
-      remote: ${{ fromJSON(env.fetch-api-data).info.version }}
-      local: ${{ env.pkg_version }}
+      remote: ${{ fromJSON(steps.check-remote.env.fetch-api-data).info.version }}
+      local: ${{ steps.check-local.env.pkg_version }}
     steps:
       - uses: actions/checkout@v3
 
