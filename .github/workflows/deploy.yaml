@@ -24,9 +24,16 @@ jobs:
         uses: JamesIves/fetch-api-data-action@v2
         with:
           endpoint: https://pypi.org/pypi/c64os-util/json
+      - run: echo ${{ fromJSON(env.fetch-api-data).info.version }}
 
+      - run: echo "$GITHUB_ENV"
+      - run: poetry version -s
+      - run: echo "pkg_version=$(poetry version -s)"
       - name: Check package version
         run: echo "pkg_version=$(poetry version -s)" >> "$GITHUB_ENV"
+      - run: echo "$GITHUB_ENV"
+      - run: echo ${{ env.pkg_version }}
+
   print-dbg:
     name: Print statements for debug
     runs-on: ubuntu-latest
