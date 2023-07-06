@@ -1,9 +1,6 @@
 C64 Archives (``.car`` files)
 =============================
 
-CLI Tools
----------
-
 High-Level API
 --------------
 

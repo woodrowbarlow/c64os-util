@@ -12,7 +12,9 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
-   car/index
+   installation
+   usage-cli
+   usage-api
 
 Appendices
 ----------

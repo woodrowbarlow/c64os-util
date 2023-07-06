@@ -20,6 +20,7 @@ author = "voidstar"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinxarg.ext",
     "sphinx_rtd_theme",
 ]
 
