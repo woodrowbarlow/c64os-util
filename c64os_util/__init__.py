@@ -14,5 +14,12 @@ read and write C64 Archive (``.car``) files. Future plans includes support for t
 various multimedia formats.
 """
 
-from .car import C64Archive, CarArchiveType, CarCompressionType, CarRecordType
+from .car import (
+    C64Archive,
+    CarArchiveType,
+    CarCompressionType,
+    CarRecordType,
+    load_car,
+    save_car,
+)
 from .util import LC_CODEC, UC_CODEC

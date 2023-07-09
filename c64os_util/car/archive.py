@@ -346,3 +346,108 @@ class C64Archive:
         )
         archive.root = ArchiveRecord.deserialize(buffer)
         return archive
+
+
+def load_car(path: str) -> C64Archive:
+    """
+    Load a ``.car`` file from the file system.
+
+    :param path: Path to the ``.car`` file.
+    :return: A deserialized ``C64Archive`` object.
+    """
+    with open(path, "rb") as buffer:
+        return C64Archive.deserialize(buffer)
+
+
+def save_car(archive: C64Archive, path: str):
+    """
+    Save a ``C64Archive`` object to a file on the file system.
+
+    :param archive: The ``C64Archive`` object to save.
+    :param path: The path where the file will be saved. (Will overwrite contents.)
+    """
+    with open(path, "wb") as buffer:
+        archive.serialize(buffer)
+
+
+def unpack_car(filename, extract_dir, *, filter=None):
+    """
+    Unpack a C64 Archive to the specified directory.
+
+    :param filename: Path to the C64 Archive file.
+    """
+    try:
+        archive = load_car(filename)
+    except CarError:
+        raise ReadError(f"{filename} is not a valid car file")
+    # archive.extractall(extract_dir, filter=filter)
+    # TODO
+    raise NotImplementedError()
+
+
+def pack_car(
+    base_name,
+    base_dir,
+    type="general",
+    compress=None,
+    verbose=0,
+    dry_run=0,
+    logger=None,
+    root_dir=None,
+):
+    """
+    Create a (possibly compressed) C64 Archive file from all the files under 'base_dir'.
+
+    'compress' must be "general" (the default), "restore", or "install".
+
+    'compress' must be None.
+
+    The output tar file will be named 'base_name' +  ".car".
+
+    Returns the output filename.
+    """
+
+    if type == "general":
+        car_type = CarArchiveType.GENERAL
+    elif type == "restore":
+        car_type = CarArchiveType.RESTORE
+    elif type == "install":
+        car_type = CarArchiveType.INSTALL
+    else:
+        raise ValueError(
+            "bad value for 'type', or archive type not " f"supported : {type}"
+        )
+
+    if compress is None:
+        car_compression = CarCompressionType.NONE
+    else:
+        raise ValueError(
+            "bad value for 'compress', or compression format not "
+            f"supported : {compress}"
+        )
+
+    archive_name = base_name + ".car"
+    archive_dir = os.path.dirname(archive_name)
+
+    if archive_dir and not os.path.exists(archive_dir):
+        if logger is not None:
+            logger.info("creating %s", archive_dir)
+        if not dry_run:
+            os.makedirs(archive_dir)
+
+    # creating the archive
+    if logger is not None:
+        logger.info("Creating car archive")
+
+    if not dry_run:
+        archive = C64Archive(archive_type=car_type)
+        arcname = base_dir
+        if root_dir is not None:
+            base_dir = os.path.join(root_dir, base_dir)
+        # archive.add(base_dir, arcname)
+        # TODO
+        raise NotImplementedError()
+
+    if root_dir is not None:
+        archive_name = os.path.abspath(archive_name)
+    return archive_name
