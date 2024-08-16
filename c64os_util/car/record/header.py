@@ -15,7 +15,7 @@ class ArchiveRecordHeader:
     properties to access the underlying fields.
     """
 
-    MAX_NAME_SIZE = 15
+    MAX_NAME_SIZE = 16
 
     def __init__(
         self,
@@ -85,7 +85,6 @@ class ArchiveRecordHeader:
         name_bytes = self.name.encode(LC_CODEC)
         name_bytes = name_bytes.ljust(ArchiveRecordHeader.MAX_NAME_SIZE, b"\xA0")
         buffer.write(name_bytes)
-        buffer.write(b"\0")  # ???
         self.compression_type.serialize(buffer)
 
     @staticmethod
@@ -101,7 +100,6 @@ class ArchiveRecordHeader:
         size = int.from_bytes(buffer.read(3), "little")
         name_bytes = buffer.read(ArchiveRecordHeader.MAX_NAME_SIZE)
         name = name_bytes.rstrip(b"\xA0").decode(LC_CODEC)
-        buffer.read(1)  # ???
         compression_type = CarCompressionType.deserialize(buffer)
         return ArchiveRecordHeader(
             name=name,

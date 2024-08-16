@@ -454,7 +454,7 @@ class ArchiveDirectory(ArchiveRecord, list):
         path.append(self.name)
         yield path, self
         for record in self.directories():
-            yield from record._walk(path)  # pylint: disable=W0212
+            yield from record._walk(path.copy())  # pylint: disable=W0212
 
     def serialize(self, buffer: typing.BinaryIO):
         """
